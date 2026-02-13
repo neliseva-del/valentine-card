@@ -1,36 +1,54 @@
 <script>
-  const card = document.getElementById('card');
-  const openBtn = document.getElementById('openBtn');
-  const yesBtn = document.getElementById('yesBtn');
-  const thanks = document.getElementById('thanks');
-  const rsvpForm = document.getElementById('rsvpForm');
+  document.addEventListener("DOMContentLoaded", () => {
+    const card = document.getElementById('card');
+    const openBtn = document.getElementById('openBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const thanks = document.getElementById('thanks');
+    const rsvpForm = document.getElementById('rsvpForm');
 
-  openBtn.addEventListener('click', () => card.classList.toggle('open'));
-
-  rsvpForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    yesBtn.disabled = true;
-    yesBtn.textContent = "Sending… 💌";
-
-    try {
-      const resp = await fetch(rsvpForm.action, {
-        method: "POST",
-        body: new FormData(rsvpForm),
-        headers: { "Accept": "application/json" }
+    // If something is missing, don't crash—show a helpful error.
+    if (!card || !openBtn || !yesBtn || !thanks || !rsvpForm) {
+      console.error("Missing element(s):", {
+        card: !!card,
+        openBtn: !!openBtn,
+        yesBtn: !!yesBtn,
+        thanks: !!thanks,
+        rsvpForm: !!rsvpForm
       });
+      return;
+    }
 
-      if (resp.ok) {
-        thanks.classList.remove('hidden');
-        yesBtn.textContent = "Yes (sent!) 💘";
-      } else {
+    openBtn.addEventListener('click', () => card.classList.toggle('open'));
+
+    rsvpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      yesBtn.disabled = true;
+      yesBtn.textContent = "Sending… 💌";
+
+      try {
+        const resp = await fetch(rsvpForm.action, {
+          method: "POST",
+          body: new FormData(rsvpForm),
+          headers: { "Accept": "application/json" }
+        });
+
+        if (resp.ok) {
+          thanks.classList.remove('hidden');
+          yesBtn.textContent = "Yes (sent!) 💘";
+        } else {
+          yesBtn.disabled = false;
+          yesBtn.textContent = "Yes 💖";
+          alert("Hmm—couldn't send. Try again?");
+        }
+      } catch (err) {
+        console.error(err);
         yesBtn.disabled = false;
         yesBtn.textContent = "Yes 💖";
-        alert("Hmm—couldn't send. Try again?");
+        alert("Network error—try again?");
       }
-    } catch {
-      yesBtn.disabled = false;
-      yesBtn.textContent = "Yes 💖";
-      alert("Network error—try again?");
-    }
+    });
   });
 </script>
+
+
